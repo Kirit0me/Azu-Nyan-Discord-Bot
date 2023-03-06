@@ -7,6 +7,13 @@ from discord.ext import commands
 from discord import app_commands
 from typing import Optional
 import jthon
+import platform
+import requests
+from anilist_anime import AnilistDiscord
+from NHentai import NHentaiAsync
+
+nhentai_async = NHentaiAsync()
+anilist = AnilistDiscord()
 
 load_dotenv()
 guildmugi = discord.Object(id = 1077593727540936766)
@@ -18,16 +25,9 @@ def run_discord_bot():
     class MyClient(discord.Client):
         def __init__(self, *, intents: discord.Intents):
             super().__init__(intents=intents)
-            # A CommandTree is a special type that holds all the application command
-            # state required to make it work. This is a separate class because it
-            # allows all the extra state to be opt-in.
-            # Whenever you want to work with application commands, your tree is used
-            # to store and work with them.
-            # Note: When using commands.Bot instead of discord.Client, the bot will
-            # maintain its own tree instead.
+
             self.tree = app_commands.CommandTree(self)
         async def setup_hook(self):
-            # This copies the global commands over to your guild.
             self.tree.copy_global_to(guild=guildmugi)
             await self.tree.sync(guild=guildmugi)
 
@@ -101,6 +101,37 @@ def run_discord_bot():
     async def hello(interaction: discord.Interaction):
         await interaction.response.send_message(f'Hi, {interaction.user.mention}')
 
+    @client.tree.command(name = "search_anime")
+    @app_commands.describe(anime_name="Which anime does thou want knowledge of?")
+    async def anilist_search(interaction : discord.Interaction, anime_name : str):
+        #anime_name = interaction.user
+        anime_embed = anilist.get_anime_discord(anime_name=anime_name)
+        if anime_embed == -1:
+            await interaction.response.send_message(f"Anime not found! Please try again or use a different name. (romaji preferred)")
+        else:
+            await interaction.response.send_message(embed=anime_embed)
+                
+        return
+    
+    @client.tree.command(name = "search_character")
+    @app_commands.describe(char_name="Which character does thou want knowledge of?")
+    async def anilist_search(interaction : discord.Interaction, char_name : str):
+        #anime_name = interaction.user
+        character_embed = anilist.get_character_discord(char_name = char_name)
+        if character_embed == -1:
+            await interaction.response.send_message(f"Character not found! Remember its anime characters!")
+        else:
+            await interaction.response.send_message(embed=character_embed)
+                
+        return
+    
+
+    @client.tree.command(name="popular_doujin")
+    async def nh_random(interaction : discord.Interaction):
+        doujin_dict = await nhentai_async.get_popular_now()
+        print(doujin_dict)
+
+
     @client.tree.command(name = "math-nyan")
     @app_commands.describe(
         first_value='Number of cats you want to breed',
@@ -145,7 +176,7 @@ def run_discord_bot():
         ryobed = discord.Embed(title= "Ryo Appreciation",
                                 url = "https://bocchi-the-rock.fandom.com/wiki/Nijika_Ijichi",
                                 description="I like Ryo so you should too",
-                                color = 0xf0e68c,
+                                color = 0x400080,
                                 )
         ryobed.set_author( name = "Kiri-Nyan", icon_url= "https://th.bing.com/th/id/OIP.sBJGJuVGCIeVxcHsvji2ugHaIF?pid=ImgDet&rs=1" )
         ryobed.set_thumbnail(url = "https://animecorner.me/wp-content/uploads/2022/09/bocchi-the-rock-ryo-yamada-trailer.jpg")
