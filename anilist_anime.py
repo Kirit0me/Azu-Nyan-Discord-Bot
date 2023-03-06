@@ -98,10 +98,10 @@ class AnilistDiscord:
 
         return anime_embed
     
-    def get_character_discord(self, char_name):
+    def get_character_discord(self, name):
         try:
-            print(char_name)
-            char_dict = anilist.get_character(char_name=char_name)
+            print(name)
+            char_dict = anilist.get_character(name)
             print(char_dict)
         except:
             return -1
@@ -110,6 +110,18 @@ class AnilistDiscord:
         native_name = char_dict["native_name"]
         description = char_dict["desc"]
         image_char = char_dict["image"]
+
+        if description != None and len(description) != 0:
+            description = description.strip().replace('<br>', '')
+            description = description.strip().replace('<i>', '')
+            description = description.strip().replace('</i>', '')
+
+        char_embed = discord.Embed(title=(first_name + last_name), color=0xA0DB8E)
+        char_embed.add_field(name = "Description", value = description)
+        char_embed.set_image(url = image_char)
+        char_embed.set_footer(text = native_name)
+
+        return char_embed
 
 
     def embedValueCheck(self, key_list) -> list:

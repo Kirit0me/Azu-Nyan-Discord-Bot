@@ -115,9 +115,9 @@ def run_discord_bot():
     
     @client.tree.command(name = "search_character")
     @app_commands.describe(char_name="Which character does thou want knowledge of?")
-    async def anilist_search(interaction : discord.Interaction, char_name : str):
+    async def char_search(interaction : discord.Interaction, char_name : str):
         #anime_name = interaction.user
-        character_embed = anilist.get_character_discord(char_name = char_name)
+        character_embed = anilist.get_character_discord(char_name)
         if character_embed == -1:
             await interaction.response.send_message(f"Character not found! Remember its anime characters!")
         else:
